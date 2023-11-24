@@ -1,58 +1,65 @@
+import re
 import random
+import pandas as pd
+import sys
+import time
+import select
 
-# Dados sobre universidades e cursos
-universidades_cursos = {
-    'universidade1': ['curso1', 'curso2', 'curso3'],
-    'universidade2': ['curso4', 'curso5', 'curso6'],
+# Caminho para o arquivo Excel
+caminho_excel = r'/Users/tomasmartim/Desktop/Projetos Pessoais/UniCodeAdvisor/cna23_1f_resultados.xls'
 
-}
+# Carregar dados do Excel, pulando a primeira linha
+dados_excel = pd.read_excel(caminho_excel, skiprows=1)
 
-# Respostas sobre suporte técnico de informática
-suporte_tecnico_respostas = [
-    'Tente reiniciar o computador.',
-    'Verifique se os drivers estão atualizados.',
-    'Você já tentou desligar e ligar novamente?',
-]
+# Criar base de dados a partir do Excel
+universidades_cursos = {}
+for index, row in dados_excel.iterrows():
+    # Use índices numéricos para acessar as colunas corretas
+    universidade = row[3]  # Índice da coluna D (universidades)
+    curso = row[4]  # Índice da coluna E (cursos)
 
-# Informações sobre linguagens de programação
-linguagens_programacao = {
-    'python': 'Python é uma linguagem de programação de alto nível e fácil de aprender.',
-    'java': 'Java é uma linguagem de programação popular, usada em diversos contextos.',
-    'javascript': 'JavaScript é uma linguagem de script amplamente usada para desenvolvimento web.',
- 
-}
+    if pd.notna(universidade) and pd.notna(curso):
+        if universidade not in universidades_cursos:
+            universidades_cursos[universidade] = [curso]
+        else:
+            universidades_cursos[universidade].append(curso)
 
 def responder_pergunta(pergunta):
-    if 'universidade' in pergunta.lower() and 'curso' in pergunta.lower():
-        return obter_resposta_universidades_cursos()
+    # Verificar se a pergunta contém o nome de algum curso e palavras-chave
+    curso_presente = any(c.lower() in pergunta.lower() for cursos in universidades_cursos.values() for c in cursos)
+    palavras_chave_presentes = any(palavra_chave in pergunta.lower() for palavra_chave in ['instituição','instituições','faculdade','faculdades','universidade','universidades'])
 
-    elif 'suporte técnico' in pergunta.lower() or 'informática' in pergunta.lower():
-        return random.choice(suporte_tecnico_respostas)
-
-    elif 'linguagem de programação' in pergunta.lower():
-        return obter_resposta_linguagens_programacao()
-
+    if curso_presente and palavras_chave_presentes:
+        palavra_chave_plural = next((p for p in ['instituicoes', 'faculdades', 'universidades'] if p in pergunta.lower()), 'instituicoes')
+        resposta = obter_resposta_por_instituicoes(pergunta, palavra_chave_plural)
     else:
-        return 'Desculpe, não entendi a pergunta.'
+        resposta = 'Não foram encontradas instituições que ofereçam o curso mencionado na pergunta ou as palavras-chave necessárias.'
 
-def obter_resposta_universidades_cursos():
-    universidade = random.choice(list(universidades_cursos.keys()))
-    curso = random.choice(universidades_cursos[universidade])
-    resposta = f'Na {universidade}, o curso oferecido é {curso}.'
     return resposta
 
-def obter_resposta_linguagens_programacao():
-    linguagem = random.choice(list(linguagens_programacao.keys()))
-    informacao = linguagens_programacao[linguagem]
-    resposta = f'Sobre {linguagem.capitalize()}: {informacao}'
+def obter_resposta_por_instituicoes(pergunta, palavra_chave_plural):
+    instituicoes_com_curso = [u for u, cursos in universidades_cursos.items() if any(c.lower() in pergunta.lower() for c in cursos)]
+    
+    if instituicoes_com_curso:
+        resposta = f'O curso está disponível nas seguintes {palavra_chave_plural}:\n'
+        resposta += '\n'.join([f'{i + 1}. {instituicao}' for i, instituicao in enumerate(instituicoes_com_curso)])
+    else:
+        resposta = f'Não foram encontradas {palavra_chave_plural} que ofereçam o curso mencionado na pergunta.'
+
     return resposta
+
+def imprimir_com_atraso(texto, atraso=0.01):
+    for char in texto:
+        print(char, end='', flush=True)
+        time.sleep(atraso)
+    print()
 
 # Loop principal
 while True:
-    pergunta = input('Você: ')
+    pergunta = input('Tu: ')
     if pergunta.lower() == 'sair':
         print('Chatbot encerrado.')
         break
 
     resposta = responder_pergunta(pergunta)
-    print('Chatbot:', resposta)
+    imprimir_com_atraso('Chatbot: ' + resposta)
