@@ -2,7 +2,7 @@
 
 ## Overview
 
-UniCode Advisor is an AI-powered chatbot designed to assist users with questions related to universities, courses, and admission averages. The bot leverages a database of universities and their corresponding courses, providing information to help students make informed decisions about their education.
+UniCode Advisor is an chatbot designed to assist users with questions related to universities, courses, and admission averages. The bot leverages a database of universities and their corresponding courses, providing information to help students make informed decisions about their education.
 
 ## Features
 
@@ -22,4 +22,4 @@ The bot uses a pre-existing database containing information about universities, 
 
 ## Disclaimer
 
-UniCode Advisor is designed for informational purposes only. The information provided may not be exhaustive or up-to-date. Users are encouraged to verify details with official sources.
+UniCodeAdvisor is designed for informational purposes only. The information provided may not be exhaustive or up-to-date. Users are encouraged to verify details with official sources.
